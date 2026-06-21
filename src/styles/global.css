@@ -110,6 +110,17 @@ ul { list-style: none; }
 .line-mask  { overflow: hidden; display: block; }
 .line-inner { display: block; will-change: transform; }
 
+/* SplitType line containers — overflow hidden clips each line */
+.st-line {
+  overflow: hidden;
+  display: block;
+  padding-bottom: 0.08em; /* prevent descender clipping */
+}
+.st-line-inner {
+  display: block;
+  will-change: transform;
+}
+
 /* ── Custom cursor ───────────────────────────────────────────────────── */
 @media (hover: hover) and (pointer: fine) {
   body { cursor: none; }

@@ -32,16 +32,7 @@ export default function Recognition() {
         })
       })
 
-      gsap.fromTo('.stat',
-        { autoAlpha: 0, y: 30 },
-        { autoAlpha: 1, y: 0, duration: 0.75, stagger: 0.1, ease: 'power3.out',
-          scrollTrigger: { trigger: statsRef.current, start: 'top 85%', toggleActions: 'play none none reverse' } }
-      )
-      gsap.fromTo('.award, .venture',
-        { autoAlpha: 0, y: 24 },
-        { autoAlpha: 1, y: 0, duration: 0.75, stagger: 0.08, ease: 'power3.out',
-          scrollTrigger: { trigger: '.recog__lower', start: 'top 85%', toggleActions: 'play none none reverse' } }
-      )
+      // stat/award/venture animations handled by useSectionReveal
     }, root)
     return () => ctx.revert()
   }, [])

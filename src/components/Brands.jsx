@@ -22,23 +22,7 @@ export default function Brands() {
     })
   }, [active])
 
-  useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return
-    const ctx = gsap.context(() => {
-      gsap.fromTo('.brow',
-        { autoAlpha: 0, y: 28 },
-        { autoAlpha: 1, y: 0, duration: 0.75, stagger: 0.08, ease: 'power3.out',
-          scrollTrigger: { trigger: '.brands__rows', start: 'top 85%', toggleActions: 'play none none reverse' } }
-      )
-      gsap.fromTo('.brands__head-content',
-        { autoAlpha: 0, y: 24 },
-        { autoAlpha: 1, y: 0, duration: 0.85, ease: 'power3.out',
-          scrollTrigger: { trigger: root.current, start: 'top 85%', toggleActions: 'play none none reverse' } }
-      )
-    }, root)
-    return () => ctx.revert()
-  }, [])
+  // No per-component scroll animations — handled by useSectionReveal in App
 
   return (
     <section className="brands section section-reveal" id="brands" ref={root}>

@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Smooth scroll driven by Lenis, synced into GSAP's ticker + ScrollTrigger.
 export function useLenis(enabled = true) {
   useEffect(() => {
     if (!enabled) return
@@ -13,11 +12,12 @@ export function useLenis(enabled = true) {
     if (reduce) return
 
     const lenis = new Lenis({
-      duration: 1.15,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      // lerp: lower = snappier/punchier scroll momentum (reference feel)
+      lerp: 0.075,
       smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.6,
+      wheelMultiplier: 1.1,
+      touchMultiplier: 1.8,
+      infinite: false,
     })
 
     window.__lenis = lenis
@@ -27,7 +27,6 @@ export function useLenis(enabled = true) {
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
 
-    // Recompute triggers once everything (fonts/images) settles.
     const refresh = () => ScrollTrigger.refresh()
     window.addEventListener('load', refresh)
     const t = setTimeout(refresh, 600)
@@ -46,7 +45,7 @@ export function scrollToId(id) {
   const el = document.getElementById(id)
   if (!el) return
   if (window.__lenis) {
-    window.__lenis.scrollTo(el, { offset: 0, duration: 1.4 })
+    window.__lenis.scrollTo(el, { offset: 0, duration: 1.2, lerp: 0.05 })
   } else {
     el.scrollIntoView({ behavior: 'smooth' })
   }

@@ -80,25 +80,7 @@ export default function Work() {
   const domainsRef = useRef(null)
   const [domHover, setDomHover] = useState(null)
 
-  useEffect(() => {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return
-    const ctx = gsap.context(() => {
-      gsap.from('.wgroup', {
-        y: 32, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.12,
-        scrollTrigger: { trigger: '.work__groups', start: 'top 82%' },
-      })
-      // Domain items: use autoAlpha so GSAP sets visibility not just opacity
-      gsap.fromTo('.domain-item',
-        { autoAlpha: 0, y: 28 },
-        {
-          autoAlpha: 1, y: 0, duration: 0.65, ease: 'power3.out', stagger: 0.07,
-          scrollTrigger: { trigger: domainsRef.current, start: 'top 85%', toggleActions: 'play none none reverse' },
-        }
-      )
-    })
-    return () => ctx.revert()
-  }, [])
+  // Scroll animations handled centrally by useSectionReveal in App
 
   return (
     <section className="work section section-reveal" id="work">
