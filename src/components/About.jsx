@@ -6,59 +6,64 @@ import { ABOUT } from '../data/content'
 
 gsap.registerPlugin(ScrollTrigger)
 
-export default function About() {
+export default function About({ loaded }) {
   const root = useRef(null)
   const stmt = useRef(null)
 
   useEffect(() => {
+    if (!loaded) return
+
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const ctx = gsap.context(() => {
 
-      // Word-by-word color scrub — signature mechanic, scrubs as you scroll
-      if (!reduce && stmt.current) {
-        const split = new SplitType(stmt.current, { types: 'words', wordClass: 'about-word' })
-        gsap.from(split.words, {
-          color: 'rgba(11,11,11,0.12)',
-          stagger: 0.04,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: stmt.current,
-            start: 'top 70%',
-            end: 'bottom 42%',
-            scrub: 0.6,
-          },
-        })
-      }
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
 
-      if (reduce) return
+        // Word-by-word color scrub — fires on scroll, no hiding needed
+        if (!reduce && stmt.current) {
+          const split = new SplitType(stmt.current, { types: 'words', wordClass: 'about-word' })
+          gsap.from(split.words, {
+            color: 'rgba(11,11,11,0.12)',
+            stagger: 0.04,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: stmt.current,
+              start: 'top 70%',
+              end: 'bottom 42%',
+              scrub: 0.6,
+            },
+          })
+        }
 
-      // Eyebrow + paragraphs: slide up tightly staggered
-      const bodyEls = root.current?.querySelectorAll('.about__eyebrow, .about__para')
-      if (bodyEls?.length) {
-        gsap.set(bodyEls, { y: 32, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: '.about__body',
-          start: 'top 82%',
-          once: true,
-          onEnter: () => gsap.to(bodyEls, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', stagger: 0.1 }),
-        })
-      }
+        if (reduce) return
 
-      // Pillar cards: each pops up in sequence (reference: row-of-cards stagger)
-      const pillars = root.current?.querySelectorAll('.pillar')
-      if (pillars?.length) {
-        gsap.set(pillars, { y: 48, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: '.about__pillars',
-          start: 'top 84%',
-          once: true,
-          onEnter: () => gsap.to(pillars, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.09 }),
-        })
-      }
+        // Eyebrow + paragraphs stagger up
+        const bodyEls = root.current?.querySelectorAll('.about__eyebrow, .about__para') ?? []
+        if (bodyEls.length) {
+          gsap.set(bodyEls, { y: 32, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: '.about__body', start: 'top 82%', once: true,
+            onEnter: () => gsap.to(bodyEls, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', stagger: 0.1 }),
+          })
+        }
 
-    }, root)
-    return () => ctx.revert()
-  }, [])
+        // Pillar cards pop up in sequence
+        const pillars = root.current?.querySelectorAll('.pillar') ?? []
+        if (pillars.length) {
+          gsap.set(pillars, { y: 48, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: '.about__pillars', start: 'top 84%', once: true,
+            onEnter: () => gsap.to(pillars, { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.09 }),
+          })
+        }
+
+        ScrollTrigger.refresh()
+
+      }, root)
+      return () => ctx.revert()
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [loaded])
 
   return (
     <section className="about section panel-paper section-reveal" id="about" ref={root}>

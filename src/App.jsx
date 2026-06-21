@@ -31,10 +31,10 @@ export default function App() {
       <Nav />
       <main>
         <Hero ready={loaded} />
-        <About />
-        <Brands />
-        <Work />
-        <Recognition />
+        <About loaded={loaded} />
+        <Brands loaded={loaded} />
+        <Work loaded={loaded} />
+        <Recognition loaded={loaded} />
         <Contact />
       </main>
     </>

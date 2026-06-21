@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 function WorkGroup({ group }) {
   const [hovered, setHovered] = useState(null)
-  const previewRef  = useRef(null)
+  const previewRef   = useRef(null)
   const containerRef = useRef(null)
 
   const onMouseMove = (e) => {
@@ -26,10 +26,9 @@ function WorkGroup({ group }) {
         <h3 className="wgroup__label">{group.label}</h3>
         <span className="wgroup__note mono">{group.note}</span>
       </div>
-
       <ul className="wlist">
         {group.items.map((item, i) => {
-          const Tag  = item.url ? 'a' : 'div'
+          const Tag   = item.url ? 'a' : 'div'
           const extra = item.url ? { href: item.url, target: '_blank', rel: 'noreferrer' } : {}
           return (
             <li key={item.id}>
@@ -51,14 +50,9 @@ function WorkGroup({ group }) {
           )
         })}
       </ul>
-
       <div className="wpreview" ref={previewRef} aria-hidden>
         {group.items.map((item, i) => (
-          <div
-            className={`wcard ${hovered === i ? 'wcard--on' : ''}`}
-            key={item.id}
-            style={{ '--tone': item.tone }}
-          >
+          <div className={`wcard ${hovered === i ? 'wcard--on' : ''}`} key={item.id} style={{ '--tone': item.tone }}>
             <span className="wcard__mark">{item.kicker}</span>
             <span className="wcard__name">{item.title}</span>
           </div>
@@ -68,40 +62,47 @@ function WorkGroup({ group }) {
   )
 }
 
-export default function Work() {
+export default function Work({ loaded }) {
   const root       = useRef(null)
   const domainsRef = useRef(null)
   const [domHover, setDomHover] = useState(null)
 
   useEffect(() => {
+    if (!loaded) return
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
-    const ctx = gsap.context(() => {
 
-      // Work rows — reference pattern: rows slide up from below, tight stagger
-      // Each wgroup triggers independently as it enters
-      root.current?.querySelectorAll('.wlist').forEach((list) => {
-        const rows = list.querySelectorAll('li')
-        gsap.set(rows, { y: 28, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: list, start: 'top 88%', once: true,
-          onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.06 }),
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+
+        // Work rows — each wlist triggers independently as it enters view
+        root.current?.querySelectorAll('.wlist').forEach((list) => {
+          const rows = list.querySelectorAll('li')
+          gsap.set(rows, { y: 28, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: list, start: 'top 88%', once: true,
+            onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.06 }),
+          })
         })
-      })
 
-      // Domain items — reference "Industries" list: each item slides up, tight stagger
-      const domainItems = domainsRef.current?.querySelectorAll('.domain-item')
-      if (domainItems?.length) {
-        gsap.set(domainItems, { y: 40, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: domainsRef.current, start: 'top 80%', once: true,
-          onEnter: () => gsap.to(domainItems, { y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.055 }),
-        })
-      }
+        // Domain items slide up with tight stagger
+        const domainItems = domainsRef.current?.querySelectorAll('.domain-item') ?? []
+        if (domainItems.length) {
+          gsap.set(domainItems, { y: 40, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: domainsRef.current, start: 'top 80%', once: true,
+            onEnter: () => gsap.to(domainItems, { y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.055 }),
+          })
+        }
 
-    }, root)
-    return () => ctx.revert()
-  }, [])
+        ScrollTrigger.refresh()
+
+      }, root)
+      return () => ctx.revert()
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [loaded])
 
   return (
     <section className="work section section-reveal" id="work" ref={root}>
@@ -116,7 +117,6 @@ export default function Work() {
         </div>
       </div>
 
-      {/* Domains — reference's "Industries we empower" — dark bg, giant hover list */}
       <div className="domains panel-black" ref={domainsRef}>
         <div className="domains__inner wrap">
           <div className="domains__head">

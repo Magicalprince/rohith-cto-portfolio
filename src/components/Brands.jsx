@@ -5,46 +5,51 @@ import { BRANDS } from '../data/content'
 
 gsap.registerPlugin(ScrollTrigger)
 
-export default function Brands() {
+export default function Brands({ loaded }) {
   const [active, setActive] = useState(0)
   const root   = useRef(null)
   const visual = useRef(null)
 
-  // Visual panel swaps colour per active brand
+  // Visual panel swaps colour per active brand — no layout dependency
   useEffect(() => {
     if (!visual.current) return
     gsap.to(visual.current, { backgroundColor: BRANDS[active].accent + '22', duration: 0.5, ease: 'power2.out' })
   }, [active])
 
   useEffect(() => {
+    if (!loaded) return
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
-    const ctx = gsap.context(() => {
 
-      // Intro paragraph fades in
-      const intro = root.current?.querySelector('.brands__intro')
-      if (intro) {
-        gsap.set(intro, { y: 22, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: intro, start: 'top 86%', once: true,
-          onEnter: () => gsap.to(intro, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' }),
-        })
-      }
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
 
-      // Brand accordion rows — reference's key animation:
-      // rows slide up from below, staggered, as you scroll to the panel
-      const rows = root.current?.querySelectorAll('.brow')
-      if (rows?.length) {
-        gsap.set(rows, { y: 36, opacity: 0 })
-        ScrollTrigger.create({
-          trigger: '.brands__rows', start: 'top 82%', once: true,
-          onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }),
-        })
-      }
+        const intro = root.current?.querySelector('.brands__intro')
+        if (intro) {
+          gsap.set(intro, { y: 22, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: intro, start: 'top 86%', once: true,
+            onEnter: () => gsap.to(intro, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' }),
+          })
+        }
 
-    }, root)
-    return () => ctx.revert()
-  }, [])
+        const rows = root.current?.querySelectorAll('.brow') ?? []
+        if (rows.length) {
+          gsap.set(rows, { y: 36, opacity: 0 })
+          ScrollTrigger.create({
+            trigger: '.brands__rows', start: 'top 82%', once: true,
+            onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }),
+          })
+        }
+
+        ScrollTrigger.refresh()
+
+      }, root)
+      return () => ctx.revert()
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [loaded])
 
   return (
     <section className="brands section section-reveal" id="brands" ref={root}>

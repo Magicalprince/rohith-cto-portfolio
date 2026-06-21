@@ -14,6 +14,7 @@ export function useSectionReveal(ready) {
     if (reduce) return
 
     const timer = setTimeout(() => {
+      ScrollTrigger.refresh()
       const ctx = gsap.context(() => {
 
         // Every .display heading outside the hero gets a line-mask wipe.
@@ -58,7 +59,7 @@ export function useSectionReveal(ready) {
       })
 
       return () => ctx.revert()
-    }, 500)
+    }, 600)
 
     return () => clearTimeout(timer)
   }, [ready])
