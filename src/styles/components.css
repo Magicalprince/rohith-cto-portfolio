@@ -69,8 +69,8 @@
   color: var(--black);
   border-bottom: 1px solid var(--black-30);
 }
-.nav__logo { height: 40px; display: flex; align-items: center; }
-.nav__logo img { height: 100%; width: auto; object-fit: contain; filter: brightness(0) invert(1); }
+.nav__logo { height: 48px; display: flex; align-items: center; }
+.nav__logo img { height: auto; width: 160px; object-fit: contain; filter: brightness(0) invert(1); }
 .nav--solid .nav__logo img { filter: none; }
 
 .nav__links { display: flex; align-items: center; gap: 2rem; }

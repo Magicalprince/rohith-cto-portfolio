@@ -27,10 +27,10 @@
 .hero__tag { color: var(--white-70); }
 .hero__loc { color: rgba(245,184,46,0.9); }
 
-/* Giant centered heading */
-.hero__heading { text-align: center; position: relative; z-index: 2; }
+/* Giant centered heading — sits above portrait in z-order, text-aligned center */
+.hero__heading { text-align: center; position: relative; z-index: 3; }
 .hero__title {
-  font-size: clamp(3.8rem, 12vw, 10.5rem);
+  font-size: clamp(3.2rem, 9.5vw, 8.5rem);
   color: var(--white);
   line-height: 0.92;
   letter-spacing: -0.035em;
@@ -47,7 +47,7 @@
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   pointer-events: none;
   z-index: 1;
@@ -55,16 +55,19 @@
 
 .hero__portrait {
   position: relative;
-  width: min(38vw, 420px);
+  width: min(34vw, 400px);
   flex-shrink: 0;
+  /* Shift portrait down slightly so it sits center-screen with room for heading above */
+  margin-top: clamp(60px, 10vh, 100px);
 }
 .hero__portrait-img {
   width: 100%;
   height: auto;
   object-fit: contain;
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
-  filter: drop-shadow(0 -20px 60px rgba(0,0,0,0.4));
+  /* Subtle fade only at the very bottom edge so most of the figure is fully visible */
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 82%, transparent 100%);
+  filter: drop-shadow(0 0px 60px rgba(0,0,0,0.35));
 }
 .hero__ring {
   position: absolute;
@@ -131,9 +134,10 @@
   justify-content: space-between;
   gap: 30px;
   flex-wrap: wrap;
-  padding-top: clamp(200px, 32vw, 380px);
+  /* Reduced padding — portrait is now centered, not bottom-anchored */
+  padding-top: clamp(60px, 12vw, 160px);
   padding-bottom: clamp(28px, 4vh, 52px);
-  background: linear-gradient(to top, rgba(9,62,71,0.95) 0%, rgba(9,62,71,0.5) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(9,62,71,0.97) 0%, rgba(9,62,71,0.6) 55%, transparent 100%);
 }
 .hero__sub {
   font-size: clamp(0.95rem, 1.4vw, 1.18rem);
@@ -671,7 +675,7 @@
   padding-bottom: clamp(40px, 6vh, 70px);
   border-bottom: 1px solid rgba(255,255,255,0.15);
 }
-.foot__logo { height: 40px; width: auto; object-fit: contain; margin-bottom: 18px; filter: brightness(0) invert(1); }
+.foot__logo { height: auto; width: 200px; object-fit: contain; margin-bottom: 18px; filter: brightness(0) invert(1); }
 .foot__name { font-size: 1.3rem; font-weight: 500; color: var(--white); letter-spacing: -0.02em; }
 .foot__pos { font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-top: 6px; display: block; }
 .foot__col { display: flex; flex-direction: column; gap: 8px; }
