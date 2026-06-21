@@ -13,7 +13,8 @@ export default function About() {
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const ctx = gsap.context(() => {
-      // Word-by-word color scrub reveal — the reference's signature mechanic
+
+      // Word-by-word color scrub reveal (signature mechanic)
       if (!reduce && stmt.current) {
         const split = new SplitType(stmt.current, { types: 'words', wordClass: 'about-word' })
         gsap.from(split.words, {
@@ -28,6 +29,27 @@ export default function About() {
           },
         })
       }
+
+      if (reduce) return
+
+      // About paragraphs stagger in
+      gsap.fromTo('.about__para',
+        { y: 28, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.12,
+          scrollTrigger: { trigger: '.about__body', start: 'top 82%', toggleActions: 'play none none none' },
+        }
+      )
+
+      // Pillar cards pop up with stagger
+      gsap.fromTo('.pillar',
+        { y: 44, opacity: 0, scale: 0.96 },
+        {
+          y: 0, opacity: 1, scale: 1, duration: 0.7, ease: 'power3.out', stagger: 0.1,
+          scrollTrigger: { trigger: '.about__pillars', start: 'top 84%', toggleActions: 'play none none none' },
+        }
+      )
+
     }, root)
     return () => ctx.revert()
   }, [])

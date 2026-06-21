@@ -5,34 +5,65 @@ import { STATS, ACHIEVEMENTS, PARTNERSHIPS, PIPELINE } from '../data/content'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Reference's "testimonials / partners" section mapped to stats + hackathon wins.
-// Uses the LIME bg (→ our gold) from the reference.
 export default function Recognition() {
   const root     = useRef(null)
   const statsRef = useRef(null)
 
-  // Count-up animation
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
     const ctx = gsap.context(() => {
-      statsRef.current?.querySelectorAll('.stat__val[data-n]').forEach((el) => {
-        const n = parseFloat(el.dataset.n)
-        if (isNaN(n)) return
-        const useComma = el.dataset.comma === '1'
-        const obj = { v: 0 }
-        gsap.to(obj, {
-          v: n, duration: 1.8, ease: 'power2.out',
-          onUpdate: () => {
-            el.textContent = useComma
-              ? Math.round(obj.v).toLocaleString('en-IN')
-              : String(Math.round(obj.v))
-          },
-          scrollTrigger: { trigger: el, start: 'top 88%' },
-        })
-      })
 
-      // stat/award/venture animations handled by useSectionReveal
+      // Stats: slide up + fade in, THEN kick off count-up so numbers
+      // aren't invisible while animating
+      const statEls = statsRef.current?.querySelectorAll('.stat')
+      if (statEls?.length) {
+        gsap.fromTo(statEls,
+          { y: 40, opacity: 0, scale: 0.95 },
+          {
+            y: 0, opacity: 1, scale: 1,
+            duration: 0.75, ease: 'power3.out',
+            stagger: 0.1,
+            scrollTrigger: { trigger: statsRef.current, start: 'top 82%', toggleActions: 'play none none none' },
+            onStart: () => {
+              // Count-up fires as stats become visible
+              statsRef.current?.querySelectorAll('.stat__val[data-n]').forEach((el) => {
+                const n = parseFloat(el.dataset.n)
+                if (isNaN(n)) return
+                const useComma = el.dataset.comma === '1'
+                const obj = { v: 0 }
+                gsap.to(obj, {
+                  v: n, duration: 1.8, ease: 'power2.out',
+                  onUpdate: () => {
+                    el.textContent = useComma
+                      ? Math.round(obj.v).toLocaleString('en-IN')
+                      : String(Math.round(obj.v))
+                  },
+                })
+              })
+            },
+          }
+        )
+      }
+
+      // Award rows stagger in
+      gsap.fromTo('.award',
+        { x: -24, opacity: 0 },
+        {
+          x: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.08,
+          scrollTrigger: { trigger: '.awards__list', start: 'top 84%', toggleActions: 'play none none none' },
+        }
+      )
+
+      // Venture cards
+      gsap.fromTo('.venture',
+        { y: 32, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', stagger: 0.12,
+          scrollTrigger: { trigger: '.ventures', start: 'top 84%', toggleActions: 'play none none none' },
+        }
+      )
+
     }, root)
     return () => ctx.revert()
   }, [])
@@ -40,7 +71,7 @@ export default function Recognition() {
   return (
     <section className="recog section section-reveal" id="recognition" ref={root}>
 
-      {/* Top: lime/gold bg — the reference's testimonials-on-lime */}
+      {/* Top: lime/gold bg */}
       <div className="recog__top panel-lime">
         <div className="wrap">
           <span className="eyebrow">005 — Recognition</span>
@@ -67,7 +98,7 @@ export default function Recognition() {
         </div>
       </div>
 
-      {/* Lower: awards + ventures — dark bg (reference's dark contrast sections) */}
+      {/* Lower: awards + ventures — dark bg */}
       <div className="recog__lower panel-black">
         <div className="wrap recog__grid">
           <div className="awards">

@@ -5,15 +5,12 @@ import { BRANDS } from '../data/content'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Reference pattern: full-width DARK photo left (sticky), white text panel right with
-// service accordion rows. Each row: NAME / DIVISION left, → arrow right.
-// Hover/open fills the row background with the section accent.
 export default function Brands() {
   const [active, setActive] = useState(0)
   const root     = useRef(null)
   const visual   = useRef(null)
 
-  // The visual panel swaps colour per active brand
+  // Visual panel swaps colour per active brand
   useEffect(() => {
     if (!visual.current) return
     gsap.to(visual.current, {
@@ -22,15 +19,40 @@ export default function Brands() {
     })
   }, [active])
 
-  // No per-component scroll animations — handled by useSectionReveal in App
+  // Scroll animations
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+    const ctx = gsap.context(() => {
+
+      // Intro paragraph
+      gsap.fromTo('.brands__intro',
+        { y: 24, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.7, ease: 'power3.out',
+          scrollTrigger: { trigger: '.brands__intro', start: 'top 86%', toggleActions: 'play none none none' },
+        }
+      )
+
+      // Brand rows stagger in from right
+      gsap.fromTo('.brow',
+        { x: 32, opacity: 0 },
+        {
+          x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.1,
+          scrollTrigger: { trigger: '.brands__rows', start: 'top 84%', toggleActions: 'play none none none' },
+        }
+      )
+
+    }, root)
+    return () => ctx.revert()
+  }, [])
 
   return (
     <section className="brands section section-reveal" id="brands" ref={root}>
 
-      {/* Full-height sticky visual (the reference's dark photo left) */}
+      {/* Full-height sticky visual */}
       <div className="brands__layout">
         <div className="brands__visual" ref={visual}>
-          {/* Portrait + large teal brand identity visual */}
           <div className="brands__visual-inner">
             <img src="/portrait.png" alt="Rohith Babu ME" className="brands__portrait" />
             <div className="brands__visual-label">

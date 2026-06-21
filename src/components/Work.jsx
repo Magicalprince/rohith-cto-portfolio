@@ -5,11 +5,6 @@ import { WORK_GROUPS, DOMAINS } from '../data/content'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Reference: the "Industries we empower" section has:
-// - dark bg (not the vivid, more a near-black)
-// - left sticky block "Industries\nwe empower" in large white text
-// - right column: a giant list of domain names, each very large, with ■ accent on hover
-// The work cards section above it is on the white panel.
 function WorkGroup({ group }) {
   const [hovered, setHovered] = useState(null)
   const previewRef = useRef(null)
@@ -18,7 +13,6 @@ function WorkGroup({ group }) {
   const onMouseMove = (e) => {
     if (!previewRef.current || !containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
-    // Position card relative to container, offset so it appears just right of cursor
     gsap.to(previewRef.current, {
       x: e.clientX - rect.left + 20,
       y: e.clientY - rect.top - 80,
@@ -77,13 +71,50 @@ function WorkGroup({ group }) {
 }
 
 export default function Work() {
+  const root       = useRef(null)
   const domainsRef = useRef(null)
   const [domHover, setDomHover] = useState(null)
 
-  // Scroll animations handled centrally by useSectionReveal in App
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return
+    const ctx = gsap.context(() => {
+
+      // Work group headers stagger in
+      gsap.fromTo('.wgroup__head',
+        { y: 20, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.12,
+          scrollTrigger: { trigger: '.work__groups', start: 'top 85%', toggleActions: 'play none none none' },
+        }
+      )
+
+      // Work rows slide up per group
+      gsap.utils.toArray('.wlist').forEach((list) => {
+        gsap.fromTo(list.querySelectorAll('.wrow'),
+          { y: 24, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.07,
+            scrollTrigger: { trigger: list, start: 'top 86%', toggleActions: 'play none none none' },
+          }
+        )
+      })
+
+      // Domain items stagger
+      gsap.fromTo('.domain-item',
+        { x: 32, opacity: 0 },
+        {
+          x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.06,
+          scrollTrigger: { trigger: '.domains__list', start: 'top 88%', toggleActions: 'play none none none' },
+        }
+      )
+
+    }, root)
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section className="work section section-reveal" id="work">
+    <section className="work section section-reveal" id="work" ref={root}>
 
       {/* Work groups — on paper (off-white) */}
       <div className="work__groups panel-paper">
@@ -96,14 +127,12 @@ export default function Work() {
         </div>
       </div>
 
-      {/* Domains — the reference's "Industries we empower" — dark bg, giant hover list */}
+      {/* Domains — dark bg, giant hover list */}
       <div className="domains panel-black" ref={domainsRef}>
         <div className="domains__inner wrap">
-          {/* Left pinned heading */}
           <div className="domains__head">
             <h2 className="domains__h display">Domains<br />I build for</h2>
           </div>
-          {/* Right giant list */}
           <ul className="domains__list">
             {DOMAINS.map((d, i) => (
               <li
