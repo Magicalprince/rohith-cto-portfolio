@@ -8,13 +8,13 @@ export default function Contact() {
   const time = useClock(CONTACT.timezone)
 
   return (
-    <section className="contact section" id="contact">
+    <section className="contact section section-reveal" id="contact">
 
       {/* Reference's "at a glance / let's create" CTA — paper bg, centered */}
       <div className="cta panel-paper">
         <div className="wrap cta__inner">
           <span className="eyebrow cta__eyebrow">006 — Contact</span>
-          <h2 className="cta__title display">
+          <h2 className="cta__title display section-title-reveal">
             Let's build something<br />worth shipping.
           </h2>
           <div className="cta__action">

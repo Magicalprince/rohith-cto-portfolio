@@ -54,11 +54,11 @@ export default function About() {
   }, [])
 
   return (
-    <section className="about section panel-paper" id="about" ref={root}>
+    <section className="about section panel-paper section-reveal" id="about" ref={root}>
 
       {/* Big word-reveal statement — reference's "We work at the point where…" */}
       <div className="about__statement wrap">
-        <p className="about__stmt display" ref={stmt}>{ABOUT.lead}</p>
+        <p className="about__stmt display section-title-reveal" ref={stmt}>{ABOUT.lead}</p>
       </div>
 
       {/* Body + pillars grid */}

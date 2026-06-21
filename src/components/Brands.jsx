@@ -41,7 +41,7 @@ export default function Brands() {
   }, [])
 
   return (
-    <section className="brands section" id="brands" ref={root}>
+    <section className="brands section section-reveal" id="brands" ref={root}>
 
       {/* Full-height sticky visual (the reference's dark photo left) */}
       <div className="brands__layout">
@@ -61,7 +61,7 @@ export default function Brands() {
         {/* Text + accordion panel */}
         <div className="brands__panel">
           <div className="brands__head-content">
-            <h2 className="brands__title display">
+            <h2 className="brands__title display section-title-reveal">
               One company.<br />Five engineering<br />divisions.
             </h2>
             <p className="brands__intro">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLenis } from './hooks/useLenis'
+import { useSectionReveal } from './hooks/useSectionReveal'
 import Preloader from './components/Preloader'
 import Cursor from './components/Cursor'
 import Nav from './components/Nav'
@@ -14,6 +15,7 @@ import ScrollProgress from './components/ScrollProgress'
 export default function App() {
   const [loaded, setLoaded] = useState(false)
   useLenis(loaded)
+  useSectionReveal(loaded)
 
   // Lock scroll during preloader
   useEffect(() => {

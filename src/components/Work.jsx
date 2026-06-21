@@ -13,16 +13,22 @@ gsap.registerPlugin(ScrollTrigger)
 function WorkGroup({ group }) {
   const [hovered, setHovered] = useState(null)
   const previewRef = useRef(null)
+  const containerRef = useRef(null)
 
   const onMouseMove = (e) => {
-    if (!previewRef.current) return
+    if (!previewRef.current || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    // Position card relative to container, offset so it appears just right of cursor
     gsap.to(previewRef.current, {
-      x: e.clientX, y: e.clientY, duration: 0.5, ease: 'power3.out',
+      x: e.clientX - rect.left + 20,
+      y: e.clientY - rect.top - 80,
+      duration: 0.35,
+      ease: 'power2.out',
     })
   }
 
   return (
-    <div className="wgroup" onMouseMove={onMouseMove}>
+    <div className="wgroup" onMouseMove={onMouseMove} ref={containerRef}>
       <div className="wgroup__head">
         <h3 className="wgroup__label">{group.label}</h3>
         <span className="wgroup__note mono">{group.note}</span>
@@ -95,14 +101,14 @@ export default function Work() {
   }, [])
 
   return (
-    <section className="work section" id="work">
+    <section className="work section section-reveal" id="work">
 
       {/* Work groups — on paper (off-white) */}
       <div className="work__groups panel-paper">
         <div className="wrap">
           <div className="work__head">
             <span className="eyebrow">004 — Selected Work</span>
-            <h2 className="work__title display">Things I've architected,<br />engineered and shipped.</h2>
+            <h2 className="work__title display section-title-reveal">Things I've architected,<br />engineered and shipped.</h2>
           </div>
           {WORK_GROUPS.map((g) => <WorkGroup key={g.id} group={g} />)}
         </div>

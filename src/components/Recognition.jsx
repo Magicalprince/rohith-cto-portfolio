@@ -47,13 +47,13 @@ export default function Recognition() {
   }, [])
 
   return (
-    <section className="recog section" id="recognition" ref={root}>
+    <section className="recog section section-reveal" id="recognition" ref={root}>
 
       {/* Top: lime/gold bg — the reference's testimonials-on-lime */}
       <div className="recog__top panel-lime">
         <div className="wrap">
           <span className="eyebrow">005 — Recognition</span>
-          <h2 className="recog__title display">Proof,<br />not promises.</h2>
+          <h2 className="recog__title display section-title-reveal">Proof,<br />not promises.</h2>
         </div>
       </div>
 
