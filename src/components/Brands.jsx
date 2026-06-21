@@ -7,41 +7,40 @@ gsap.registerPlugin(ScrollTrigger)
 
 export default function Brands() {
   const [active, setActive] = useState(0)
-  const root     = useRef(null)
-  const visual   = useRef(null)
+  const root   = useRef(null)
+  const visual = useRef(null)
 
   // Visual panel swaps colour per active brand
   useEffect(() => {
     if (!visual.current) return
-    gsap.to(visual.current, {
-      backgroundColor: BRANDS[active].accent + '22',
-      duration: 0.5, ease: 'power2.out',
-    })
+    gsap.to(visual.current, { backgroundColor: BRANDS[active].accent + '22', duration: 0.5, ease: 'power2.out' })
   }, [active])
 
-  // Scroll animations
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
     const ctx = gsap.context(() => {
 
-      // Intro paragraph
-      gsap.fromTo('.brands__intro',
-        { y: 24, opacity: 0 },
-        {
-          y: 0, opacity: 1, duration: 0.7, ease: 'power3.out',
-          scrollTrigger: { trigger: '.brands__intro', start: 'top 86%', toggleActions: 'play none none none' },
-        }
-      )
+      // Intro paragraph fades in
+      const intro = root.current?.querySelector('.brands__intro')
+      if (intro) {
+        gsap.set(intro, { y: 22, opacity: 0 })
+        ScrollTrigger.create({
+          trigger: intro, start: 'top 86%', once: true,
+          onEnter: () => gsap.to(intro, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out' }),
+        })
+      }
 
-      // Brand rows stagger in from right
-      gsap.fromTo('.brow',
-        { x: 32, opacity: 0 },
-        {
-          x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.1,
-          scrollTrigger: { trigger: '.brands__rows', start: 'top 84%', toggleActions: 'play none none none' },
-        }
-      )
+      // Brand accordion rows — reference's key animation:
+      // rows slide up from below, staggered, as you scroll to the panel
+      const rows = root.current?.querySelectorAll('.brow')
+      if (rows?.length) {
+        gsap.set(rows, { y: 36, opacity: 0 })
+        ScrollTrigger.create({
+          trigger: '.brands__rows', start: 'top 82%', once: true,
+          onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08 }),
+        })
+      }
 
     }, root)
     return () => ctx.revert()
@@ -49,9 +48,8 @@ export default function Brands() {
 
   return (
     <section className="brands section section-reveal" id="brands" ref={root}>
-
-      {/* Full-height sticky visual */}
       <div className="brands__layout">
+
         <div className="brands__visual" ref={visual}>
           <div className="brands__visual-inner">
             <img src="/portrait.png" alt="Rohith Babu ME" className="brands__portrait" />
@@ -64,10 +62,9 @@ export default function Brands() {
           </div>
         </div>
 
-        {/* Text + accordion panel */}
         <div className="brands__panel">
           <div className="brands__head-content">
-            <h2 className="brands__title display section-title-reveal">
+            <h2 className="brands__title display">
               One company.<br />Five engineering<br />divisions.
             </h2>
             <p className="brands__intro">

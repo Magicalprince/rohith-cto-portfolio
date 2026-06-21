@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 function WorkGroup({ group }) {
   const [hovered, setHovered] = useState(null)
-  const previewRef = useRef(null)
+  const previewRef  = useRef(null)
   const containerRef = useRef(null)
 
   const onMouseMove = (e) => {
@@ -16,8 +16,7 @@ function WorkGroup({ group }) {
     gsap.to(previewRef.current, {
       x: e.clientX - rect.left + 20,
       y: e.clientY - rect.top - 80,
-      duration: 0.35,
-      ease: 'power2.out',
+      duration: 0.35, ease: 'power2.out',
     })
   }
 
@@ -30,7 +29,7 @@ function WorkGroup({ group }) {
 
       <ul className="wlist">
         {group.items.map((item, i) => {
-          const Tag = item.url ? 'a' : 'div'
+          const Tag  = item.url ? 'a' : 'div'
           const extra = item.url ? { href: item.url, target: '_blank', rel: 'noreferrer' } : {}
           return (
             <li key={item.id}>
@@ -45,7 +44,7 @@ function WorkGroup({ group }) {
                 <span className="wrow__title">{item.title}</span>
                 <span className="wrow__tag">{item.tag}</span>
                 <span className="wrow__metric mono">{item.metric}</span>
-                <span className={`wrow__status mono`} data-s={item.status.toLowerCase()}>{item.status}</span>
+                <span className="wrow__status mono" data-s={item.status.toLowerCase()}>{item.status}</span>
                 <span className="wrow__arrow">↗</span>
               </Tag>
             </li>
@@ -53,7 +52,6 @@ function WorkGroup({ group }) {
         })}
       </ul>
 
-      {/* floating preview card (cursor-following) */}
       <div className="wpreview" ref={previewRef} aria-hidden>
         {group.items.map((item, i) => (
           <div
@@ -80,34 +78,26 @@ export default function Work() {
     if (reduce) return
     const ctx = gsap.context(() => {
 
-      // Work group headers stagger in
-      gsap.fromTo('.wgroup__head',
-        { y: 20, opacity: 0 },
-        {
-          y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.12,
-          scrollTrigger: { trigger: '.work__groups', start: 'top 85%', toggleActions: 'play none none none' },
-        }
-      )
-
-      // Work rows slide up per group
-      gsap.utils.toArray('.wlist').forEach((list) => {
-        gsap.fromTo(list.querySelectorAll('.wrow'),
-          { y: 24, opacity: 0 },
-          {
-            y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.07,
-            scrollTrigger: { trigger: list, start: 'top 86%', toggleActions: 'play none none none' },
-          }
-        )
+      // Work rows — reference pattern: rows slide up from below, tight stagger
+      // Each wgroup triggers independently as it enters
+      root.current?.querySelectorAll('.wlist').forEach((list) => {
+        const rows = list.querySelectorAll('li')
+        gsap.set(rows, { y: 28, opacity: 0 })
+        ScrollTrigger.create({
+          trigger: list, start: 'top 88%', once: true,
+          onEnter: () => gsap.to(rows, { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.06 }),
+        })
       })
 
-      // Domain items stagger
-      gsap.fromTo('.domain-item',
-        { x: 32, opacity: 0 },
-        {
-          x: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.06,
-          scrollTrigger: { trigger: '.domains__list', start: 'top 88%', toggleActions: 'play none none none' },
-        }
-      )
+      // Domain items — reference "Industries" list: each item slides up, tight stagger
+      const domainItems = domainsRef.current?.querySelectorAll('.domain-item')
+      if (domainItems?.length) {
+        gsap.set(domainItems, { y: 40, opacity: 0 })
+        ScrollTrigger.create({
+          trigger: domainsRef.current, start: 'top 80%', once: true,
+          onEnter: () => gsap.to(domainItems, { y: 0, opacity: 1, duration: 0.55, ease: 'power3.out', stagger: 0.055 }),
+        })
+      }
 
     }, root)
     return () => ctx.revert()
@@ -116,18 +106,17 @@ export default function Work() {
   return (
     <section className="work section section-reveal" id="work" ref={root}>
 
-      {/* Work groups — on paper (off-white) */}
       <div className="work__groups panel-paper">
         <div className="wrap">
           <div className="work__head">
             <span className="eyebrow">004 — Selected Work</span>
-            <h2 className="work__title display section-title-reveal">Things I've architected,<br />engineered and shipped.</h2>
+            <h2 className="work__title display">Things I've architected,<br />engineered and shipped.</h2>
           </div>
           {WORK_GROUPS.map((g) => <WorkGroup key={g.id} group={g} />)}
         </div>
       </div>
 
-      {/* Domains — dark bg, giant hover list */}
+      {/* Domains — reference's "Industries we empower" — dark bg, giant hover list */}
       <div className="domains panel-black" ref={domainsRef}>
         <div className="domains__inner wrap">
           <div className="domains__head">

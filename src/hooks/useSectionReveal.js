@@ -5,23 +5,30 @@ import SplitType from 'split-type'
 
 gsap.registerPlugin(ScrollTrigger)
 
-// Line-mask reveal on section headings only.
-// Everything else stays in individual components where it's safe.
+// Handles ONLY the large heading line-wipe reveals for each section.
+// Per-element animations (rows, cards, stats) live in their own components.
 export function useSectionReveal(ready) {
   useEffect(() => {
     if (!ready) return
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return
 
-    // Small delay so all components mount and ScrollTrigger.refresh() has run
     const timer = setTimeout(() => {
       const ctx = gsap.context(() => {
 
-        // Line-by-line reveal on every display heading OUTSIDE the hero
-        // (hero has its own line animation via hero__line-inner)
-        gsap.utils.toArray('#about .display, #brands .display, #work .display, #recognition .display, #contact .display').forEach((el) => {
-          const split = new SplitType(el, { types: 'lines', lineClass: 'st-line' })
+        // Every .display heading outside the hero gets a line-mask wipe.
+        // Trigger fires EARLY (top 95%) so heading is already revealed by
+        // the time row/card animations below it start — matches the
+        // reference where headings appear crisp as the section enters view.
+        const headings = gsap.utils.toArray(
+          '#about .display, #brands .display, #work .display, #recognition .display, #contact .display'
+        )
 
+        headings.forEach((el) => {
+          // Guard: skip if already split (component re-renders)
+          if (el.querySelector('.st-line')) return
+
+          const split = new SplitType(el, { types: 'lines', lineClass: 'st-line' })
           split.lines.forEach((line) => {
             const inner = document.createElement('span')
             inner.className = 'st-line-inner'
@@ -32,28 +39,18 @@ export function useSectionReveal(ready) {
 
           gsap.fromTo(
             el.querySelectorAll('.st-line-inner'),
-            { yPercent: 108 },
+            { yPercent: 106 },
             {
               yPercent: 0,
-              duration: 1.05,
+              duration: 0.95,
               ease: 'power4.out',
-              stagger: 0.09,
+              stagger: 0.08,
               scrollTrigger: {
                 trigger: el,
-                start: 'top 88%',
+                // Fire early so heading lands before row animations start
+                start: 'top 92%',
                 toggleActions: 'play none none none',
               },
-            }
-          )
-        })
-
-        // Eyebrows — simple fade+slide, safe
-        gsap.utils.toArray('#about .eyebrow, #brands .eyebrow, #work .eyebrow, #recognition .eyebrow, #contact .eyebrow').forEach((el) => {
-          gsap.fromTo(el,
-            { y: 18, opacity: 0 },
-            {
-              y: 0, opacity: 1, duration: 0.65, ease: 'power3.out',
-              scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' },
             }
           )
         })
@@ -61,7 +58,7 @@ export function useSectionReveal(ready) {
       })
 
       return () => ctx.revert()
-    }, 800)
+    }, 500)
 
     return () => clearTimeout(timer)
   }, [ready])
