@@ -8,55 +8,80 @@ gsap.registerPlugin(ScrollTrigger)
 export default function Recognition({ loaded }) {
   const root     = useRef(null)
   const statsRef = useRef(null)
+  const triggered = useRef(false)
 
   useEffect(() => {
-    // Wait until preloader is done and page is at scroll:0 with final layout.
-    // Without this, ScrollTrigger calculates positions before layout settles
-    // and onEnter never fires for elements that are "already past" the trigger.
     if (!loaded) return
 
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) return
-
-    // Small delay after loaded so ScrollTrigger.refresh() in useSectionReveal
-    // has run and all layout is final
     const timer = setTimeout(() => {
-      const ctx = gsap.context(() => {
+      if (triggered.current) return
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-        // Stats: hide all cards, then reveal + count-up when grid enters view
-        const stats = statsRef.current?.querySelectorAll('.stat') ?? []
-        stats.forEach((statEl, idx) => {
-          const numEl = statEl.querySelector('.stat__num')
+      // ── Count-up via IntersectionObserver ─────────────────────────────
+      // Completely avoids GSAP context scoping issues with plain objects.
+      // Each stat counts its own number when the stats grid enters the viewport.
+      const grid = statsRef.current
+      if (!grid) return
+
+      const runCountUp = () => {
+        if (triggered.current) return
+        triggered.current = true
+
+        grid.querySelectorAll('.stat').forEach((statEl, idx) => {
+          const numEl   = statEl.querySelector('.stat__num')
           if (!numEl) return
           const target   = parseFloat(numEl.dataset.n)
           const useComma = numEl.dataset.comma === '1'
-          if (isNaN(target)) return
+          if (!target || isNaN(target)) return
 
-          gsap.set(statEl, { y: 40, opacity: 0 })
+          // Entrance animation
+          if (!reduce) {
+            gsap.fromTo(statEl,
+              { y: 40, opacity: 0 },
+              { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out', delay: idx * 0.09 }
+            )
+          }
 
-          const obj = { v: 0 }
-          ScrollTrigger.create({
-            trigger: statsRef.current,
-            start: 'top 80%',
-            once: true,
-            onEnter: () => {
-              gsap.to(statEl, { y: 0, opacity: 1, duration: 0.75, ease: 'power3.out', delay: idx * 0.09 })
-              gsap.to(obj, {
-                v: target,
-                duration: 1.8,
-                ease: 'power2.out',
-                delay: idx * 0.09,
-                onUpdate: () => {
-                  numEl.textContent = useComma
-                    ? Math.round(obj.v).toLocaleString('en-IN')
-                    : String(Math.round(obj.v))
-                },
-              })
-            },
-          })
+          // Count-up using plain RAF loop — no GSAP object tweening
+          const duration = 1800 // ms
+          const startDelay = idx * 90
+          const startTime = performance.now() + startDelay
+
+          const tick = (now) => {
+            const elapsed = Math.max(0, now - startTime)
+            const progress = Math.min(elapsed / duration, 1)
+            // ease-out-quart
+            const eased = 1 - Math.pow(1 - progress, 4)
+            const current = Math.round(eased * target)
+            numEl.textContent = useComma
+              ? current.toLocaleString('en-IN')
+              : String(current)
+            if (progress < 1) requestAnimationFrame(tick)
+          }
+
+          if (startDelay > 0) {
+            setTimeout(() => requestAnimationFrame(tick), startDelay)
+          } else {
+            requestAnimationFrame(tick)
+          }
         })
+      }
 
-        // Award rows stagger in
+      // Use IntersectionObserver — fires reliably regardless of scroll position
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            observer.disconnect()
+            runCountUp()
+          }
+        },
+        { threshold: 0.1 }
+      )
+      observer.observe(grid)
+
+      // ── Other animations ───────────────────────────────────────────────
+      if (!reduce) {
+        // Awards
         gsap.utils.toArray('.award').forEach((el, i) => {
           gsap.set(el, { x: -28, opacity: 0 })
           ScrollTrigger.create({
@@ -65,7 +90,7 @@ export default function Recognition({ loaded }) {
           })
         })
 
-        // Venture cards
+        // Ventures
         gsap.utils.toArray('.venture').forEach((el, i) => {
           gsap.set(el, { y: 28, opacity: 0 })
           ScrollTrigger.create({
@@ -73,12 +98,12 @@ export default function Recognition({ loaded }) {
             onEnter: () => gsap.to(el, { y: 0, opacity: 1, duration: 0.65, ease: 'power3.out', delay: i * 0.14 }),
           })
         })
+      }
 
-        ScrollTrigger.refresh()
+      ScrollTrigger.refresh()
 
-      }, root)
-      return () => ctx.revert()
-    }, 200)
+      return () => observer.disconnect()
+    }, 300)
 
     return () => clearTimeout(timer)
   }, [loaded])
