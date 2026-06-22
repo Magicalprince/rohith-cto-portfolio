@@ -29,7 +29,7 @@
 
 /* Company logo */
 .preloader__logo {
-  width: clamp(80px, 14vw, 160px);
+  width: clamp(120px, 22vw, 260px);
   will-change: transform, opacity;
 }
 .preloader__logo img {
