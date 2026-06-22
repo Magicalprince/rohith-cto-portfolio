@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 
-// Matches valmax.dev reference exactly:
-// lime bg → dark logo scales up → bg flips to vivid teal → wipes up
 export default function Preloader({ onDone }) {
-  const root  = useRef(null)
-  const logo  = useRef(null)
-  const pct   = useRef(null)
+  const root    = useRef(null)
+  const nameEl  = useRef(null)
+  const roleEl  = useRef(null)
+  const barFill = useRef(null)
+  const pct     = useRef(null)
+  const curtain = useRef(null)
 
   useEffect(() => {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -14,34 +15,57 @@ export default function Preloader({ onDone }) {
 
     const ctx = gsap.context(() => {
       const counter = { v: 0 }
-      const tl = gsap.timeline({ onComplete: () => onDone?.() })
 
-      // count 0 → 100
-      tl.to(counter, {
-        v: 100, duration: 1.8, ease: 'power2.inOut',
-        onUpdate: () => {
-          if (pct.current) pct.current.textContent = String(Math.round(counter.v)).padStart(3, '0')
+      const tl = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+        onComplete: () => onDone?.(),
+      })
+
+      // 1. Name slides up from clip (line-mask reveal)
+      tl.fromTo(nameEl.current,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 1.0, ease: 'power4.out' },
+        0.1
+      )
+
+      // 2. Role line follows
+      tl.fromTo(roleEl.current,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.8, ease: 'power3.out' },
+        0.3
+      )
+
+      // 3. Progress bar fills while counter ticks 000 → 100
+      tl.to(barFill.current,
+        { scaleX: 1, duration: 1.5, ease: 'power2.inOut' },
+        0.4
+      )
+
+      tl.to(counter,
+        {
+          v: 100,
+          duration: 1.5,
+          ease: 'power2.inOut',
+          onUpdate: () => {
+            if (pct.current)
+              pct.current.textContent = String(Math.round(counter.v)).padStart(3, '0')
+          },
         },
-      }, 0)
+        0.4
+      )
 
-      // logo scales up from small
-      tl.fromTo(logo.current,
-        { scale: 0.6, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 1.0, ease: 'power3.out' }, 0.1)
+      // 4. Curtain sweeps UP — teal panel rises from bottom and covers everything
+      tl.to(curtain.current,
+        { translateY: '0%', duration: 0.7, ease: 'power4.inOut' },
+        '+=0.15'
+      )
 
-      // bg flips: lime → vivid teal (the reference's lime → violet flip)
-      tl.to(root.current, { backgroundColor: '#0E5F6A', duration: 0.55, ease: 'power2.inOut' }, 1.3)
-      // logo filter: dark → white (since it's now on teal bg)
-      tl.to(logo.current.querySelector('img'), { filter: 'brightness(0) invert(1)', duration: 0.4 }, 1.3)
-      // counter also flips
-      tl.to(pct.current, { color: '#F5B82E', duration: 0.3 }, 1.3)
+      // 5. Whole preloader exits upward together with curtain
+      tl.to(root.current,
+        { yPercent: -100, duration: 0.65, ease: 'power4.inOut' },
+        '<0.08'
+      )
 
-      // slight scale on vivid
-      tl.to(logo.current, { scale: 1.04, duration: 0.35, ease: 'power1.inOut', yoyo: true, repeat: 1 }, 1.4)
-
-      // wipe UP — whole panel exits upward
-      tl.to(root.current, { yPercent: -100, duration: 0.95, ease: 'power4.inOut' }, '+=0.1')
-      tl.to([logo.current, pct.current], { opacity: 0, duration: 0.2 }, '<0.1')
     }, root)
 
     return () => ctx.revert()
@@ -49,10 +73,23 @@ export default function Preloader({ onDone }) {
 
   return (
     <div className="preloader" ref={root}>
-      <div className="preloader__logo" ref={logo}>
-        <img src="/logo.png" alt="WelBuilt AI" />
+
+      <div className="preloader__name-wrap">
+        <span className="preloader__name" ref={nameEl}>Rohith Babu ME</span>
       </div>
+
+      <div className="preloader__role-wrap">
+        <span className="preloader__role" ref={roleEl}>Co-founder & CTO — Welbuilt AI Solutions</span>
+      </div>
+
+      <div className="preloader__bar-track">
+        <div className="preloader__bar-fill" ref={barFill} />
+      </div>
+
       <div className="preloader__pct" ref={pct}>000</div>
+
+      {/* Teal curtain that sweeps up to exit */}
+      <div className="preloader__curtain" ref={curtain} />
     </div>
   )
 }
